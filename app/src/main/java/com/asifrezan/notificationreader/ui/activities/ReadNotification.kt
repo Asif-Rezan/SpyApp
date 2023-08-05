@@ -1,8 +1,9 @@
-package com.asifrezan.notificationreader
+package com.asifrezan.notificationreader.ui.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import com.asifrezan.notificationreader.R
+import com.asifrezan.notificationreader.data.services.NotificationService
 
 class ReadNotification : AppCompatActivity() {
     private lateinit var notificationService: NotificationService

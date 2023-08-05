@@ -1,4 +1,4 @@
-package com.asifrezan.notificationreader
+package com.asifrezan.notificationreader.data.services
 
 import android.app.Notification
 import android.service.notification.NotificationListenerService

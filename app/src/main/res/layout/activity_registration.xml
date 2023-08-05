@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@android:color/white">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/registrationCardView"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_margin="16dp"
+        android:elevation="8dp"
+        app:cardCornerRadius="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <EditText
+                android:id="@+id/firstNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="First Name"
+                android:padding="12dp" />
+
+            <EditText
+                android:id="@+id/lastNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Last Name"
+                android:padding="12dp" />
+
+            <EditText
+                android:id="@+id/emailEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:padding="12dp" />
+
+            <EditText
+                android:id="@+id/passwordEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:padding="12dp" />
+
+            <Button
+                android:id="@+id/registerButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Register"
+                android:textColor="@android:color/white"
+                android:background="#FF5722" /> <!-- Color Primary -->
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>
