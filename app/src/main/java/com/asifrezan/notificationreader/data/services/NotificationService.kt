@@ -4,10 +4,14 @@ import android.app.Notification
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import com.asifrezan.notificationreader.data.models.Messages
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 class NotificationService : NotificationListenerService() {
 
     private var previousNotificationText: String? = null
+    private lateinit var database: DatabaseReference
 
     companion object {
         var notificationText: String? = null
@@ -19,32 +23,55 @@ class NotificationService : NotificationListenerService() {
         val packageName = sbn.packageName
         val title = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
         val text = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
+        val timeStamp = (System.currentTimeMillis()).toString()
+        val username: String?= "ASIF REZAN"
+        var msgFrom:String?=null
+
+        if (!::database.isInitialized) {
+            database = FirebaseDatabase.getInstance().getReference("Messages")
+        }
+
+      //  database = FirebaseDatabase.getInstance().getReference("Messages")
 
         when (packageName) {
             "com.whatsapp" -> {
-                // This is a notification from WhatsApp
                 Log.e("eeee", "WhatsApp notification: $title: $text" ?: "null")
-                // Show the notification text in your UI or perform any other action
+                msgFrom = "Whatsapp"
+                val messages = Messages(username!!, timeStamp,msgFrom,text!!)
+                database.child(title!!).child(text).setValue(messages).addOnSuccessListener {
+                    Log.e("eeee","Successfully saved in database")
+                }.addOnFailureListener {
+                    Log.e("eeee",it.message.toString())
+                }
+
             }
             "com.facebook.lite" -> {
-                // This is a notification from Facebook Lite
                 Log.e("eeee", "Facebook Lite notification: $title: $text" ?: "null")
-                // Show the notification text in your UI or perform any other action
+                msgFrom = "Facebook"
+                val messages = Messages(username!!, timeStamp,msgFrom,text!!)
+                database.child(title!!).child(text).setValue(messages).addOnSuccessListener {
+                    Log.e("eeee","Successfully saved in database")
+                }.addOnFailureListener {
+                    Log.e("eeee",it.message.toString())
+                }
             }
             "com.facebook.orca" -> {
-                // This is a notification from Facebook Messenger
                 if (title != "Chat heads active")
                 {
                     Log.e("eeee", "Facebook Messenger notification: $title: $text" ?: "null")
+                    msgFrom = "Facebok Lite"
+                    val messages = Messages(username!!, timeStamp,msgFrom,text!!)
+                    database.child(title!!).child(text).setValue(messages).addOnSuccessListener {
+                        Log.e("eeee","Successfully saved in database")
+                    }.addOnFailureListener {
+                        Log.e("eeee",it.message.toString())
+                    }
                 }
 
-                // Show the notification text in your UI or perform any other action
             }
             else -> {
-                // This is a notification from another app
-              //  Log.e("eeee", "Other notification: $title: $text" ?: "null")
-            }
 
+            }
         }
     }
 

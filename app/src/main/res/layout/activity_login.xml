@@ -25,7 +25,7 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/your_logo" />
+                android:src="@drawable/ic_launcher_background" />
 
             <EditText
                 android:id="@+id/emailEditText"

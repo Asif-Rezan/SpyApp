@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "48154620821",
+    "project_id": "notificationreader-9b068",
+    "storage_bucket": "notificationreader-9b068.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:48154620821:android:c2aeb82eeda3590a49fc9c",
+        "android_client_info": {
+          "package_name": "com.asifrezan.notificationreader"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "48154620821-g2j5v8m484ki3omb3op3hbs17veb0d4n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBtPadHuq214e7YgpgCWMcU4uAKoSSRsw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "48154620821-g2j5v8m484ki3omb3op3hbs17veb0d4n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
