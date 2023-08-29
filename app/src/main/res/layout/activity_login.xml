@@ -28,7 +28,7 @@
                 android:src="@drawable/ic_launcher_background" />
 
             <EditText
-                android:id="@+id/emailEditText"
+                android:id="@+id/usernameEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
@@ -70,9 +70,27 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 android:text="New User? Register"
-                android:textColor="#FF9800" /> <!-- Color Accent -->
+                android:textColor="#FF9800" />
+
+            <TextView
+                android:id="@+id/errorMsg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text=""
+                android:textColor="#FF5722"
+                android:gravity="center"
+                android:padding="12dp" />
 
         </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
     </androidx.cardview.widget.CardView>
 
 </RelativeLayout>

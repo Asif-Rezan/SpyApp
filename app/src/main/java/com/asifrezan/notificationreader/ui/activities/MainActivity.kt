@@ -20,6 +20,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, RegistrationActivity::class.java)
             startActivity(intent)
         }
+        binding.login.setOnClickListener{
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+        }
 
         if (!isNotificationServiceEnabled()) {
             // Ask the user to enable the Notification Listener service
