@@ -6,15 +6,20 @@ import android.os.Bundle
 import android.provider.Settings
 import com.asifrezan.notificationreader.R
 import com.asifrezan.notificationreader.databinding.ActivityMainBinding
+import com.asifrezan.notificationreader.databinding.ActivityRegistrationBinding
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-
-
+        binding.signUp.setOnClickListener{
+            val intent = Intent(this, RegistrationActivity::class.java)
+            startActivity(intent)
+        }
 
         if (!isNotificationServiceEnabled()) {
             // Ask the user to enable the Notification Listener service

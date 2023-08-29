@@ -5,6 +5,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import com.asifrezan.notificationreader.data.models.Messages
+import com.asifrezan.notificationreader.utils.PreferenceUtils
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
@@ -24,14 +25,13 @@ class NotificationService : NotificationListenerService() {
         val title = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
         val text = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
         val timeStamp = (System.currentTimeMillis()).toString()
-        val username: String?= "ASIF REZAN"
         var msgFrom:String?=null
+        val username = PreferenceUtils.getString(this, "username", "")
+
 
         if (!::database.isInitialized) {
             database = FirebaseDatabase.getInstance().getReference("Messages")
         }
-
-      //  database = FirebaseDatabase.getInstance().getReference("Messages")
 
         when (packageName) {
             "com.whatsapp" -> {
@@ -47,7 +47,7 @@ class NotificationService : NotificationListenerService() {
             }
             "com.facebook.lite" -> {
                 Log.e("eeee", "Facebook Lite notification: $title: $text" ?: "null")
-                msgFrom = "Facebook"
+                msgFrom = "Facebook Lite"
                 val messages = Messages(username!!, timeStamp,msgFrom,text!!)
                 database.child(title!!).child(text).setValue(messages).addOnSuccessListener {
                     Log.e("eeee","Successfully saved in database")
@@ -59,7 +59,7 @@ class NotificationService : NotificationListenerService() {
                 if (title != "Chat heads active")
                 {
                     Log.e("eeee", "Facebook Messenger notification: $title: $text" ?: "null")
-                    msgFrom = "Facebok Lite"
+                    msgFrom = "Facebook"
                     val messages = Messages(username!!, timeStamp,msgFrom,text!!)
                     database.child(title!!).child(text).setValue(messages).addOnSuccessListener {
                         Log.e("eeee","Successfully saved in database")
