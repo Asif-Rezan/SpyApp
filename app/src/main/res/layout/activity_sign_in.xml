@@ -50,9 +50,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
+                android:background="#FF5722"
                 android:text="Log In"
-                android:textColor="@android:color/white"
-                android:background="#FF5722" /> <!-- Color Primary -->
+                android:textColor="@android:color/white" /> <!-- Color Primary -->
 
             <TextView
                 android:id="@+id/forgotPasswordTextView"
@@ -77,10 +77,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text=""
-                android:textColor="#FF5722"
                 android:gravity="center"
-                android:padding="12dp" />
+                android:padding="12dp"
+                android:text=""
+                android:textColor="#FF5722" />
 
         </LinearLayout>
 

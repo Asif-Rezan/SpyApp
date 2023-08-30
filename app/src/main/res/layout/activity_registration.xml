@@ -79,7 +79,6 @@
                 android:text="Register"
                 android:textColor="@android:color/white"
                 android:background="#FF5722" />
-
             <TextView
                 android:id="@+id/errorMsg"
                 android:layout_width="match_parent"

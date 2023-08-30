@@ -15,6 +15,9 @@
         android:theme="@style/Theme.NotificationReader"
         tools:targetApi="31">
         <activity
+            android:name=".ui.activities.SignInActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activities.RegistrationActivity"
             android:exported="false" />
         <activity
