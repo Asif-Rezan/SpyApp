@@ -20,9 +20,7 @@
         <activity
             android:name=".ui.activities.RegistrationActivity"
             android:exported="false" />
-        <activity
-            android:name=".ui.activities.LoginActivity"
-            android:exported="false" />
+
         <activity
             android:name=".ui.activities.ReadNotification"
             android:exported="false">
@@ -42,6 +40,9 @@
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
+            <meta-data
+                android:name="firebase_performance_logcat_enabled"
+                android:value="true" />
         </activity>
 
         <service

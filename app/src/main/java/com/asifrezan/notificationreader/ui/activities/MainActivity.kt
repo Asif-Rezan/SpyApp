@@ -4,6 +4,10 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.setupWithNavController
 import com.asifrezan.notificationreader.R
 import com.asifrezan.notificationreader.databinding.ActivityMainBinding
 import com.asifrezan.notificationreader.databinding.ActivityRegistrationBinding
@@ -16,14 +20,28 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        binding.signUp.setOnClickListener{
-            val intent = Intent(this, RegistrationActivity::class.java)
-            startActivity(intent)
+
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
+        val navController = navHostFragment.findNavController()
+
+        binding.bottomNavigationBarId.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.notesFregment -> navController.navigate(R.id.notesFregment)
+                R.id.addNotesFregment -> navController.navigate(R.id.addNotesFregment)
+                R.id.settingsFregment -> navController.navigate(R.id.settingsFregment)
+
+            }
+            true
         }
-        binding.login.setOnClickListener{
-            val intent = Intent(this, SignInActivity::class.java)
-            startActivity(intent)
-        }
+
+//        binding.signUp.setOnClickListener{
+//            val intent = Intent(this, RegistrationActivity::class.java)
+//            startActivity(intent)
+//        }
+//        binding.login.setOnClickListener{
+//            val intent = Intent(this, SignInActivity::class.java)
+//            startActivity(intent)
+//        }
 
         if (!isNotificationServiceEnabled()) {
             // Ask the user to enable the Notification Listener service
@@ -33,7 +51,6 @@ class MainActivity : AppCompatActivity() {
             // Start the service
             startService(Intent(this, MainActivity::class.java))
         }
-
     }
 
 

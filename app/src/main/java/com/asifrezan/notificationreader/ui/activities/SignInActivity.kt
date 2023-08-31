@@ -36,13 +36,10 @@ class SignInActivity : AppCompatActivity() {
             val password = binding.passwordEditText.text.toString()
 
             CoroutineScope(Dispatchers.IO).launch {
-
-
                 database.child(username)
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             progressBar.visibility = View.GONE
-
                             if (snapshot.exists()) {
                                 val storedPassword =
                                     snapshot.child("password").getValue(String::class.java)
