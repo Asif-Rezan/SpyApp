@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         val navController = navHostFragment.findNavController()
 
@@ -34,14 +33,6 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-//        binding.signUp.setOnClickListener{
-//            val intent = Intent(this, RegistrationActivity::class.java)
-//            startActivity(intent)
-//        }
-//        binding.login.setOnClickListener{
-//            val intent = Intent(this, SignInActivity::class.java)
-//            startActivity(intent)
-//        }
 
         if (!isNotificationServiceEnabled()) {
             // Ask the user to enable the Notification Listener service
