@@ -6,6 +6,7 @@ import android.view.View
 import com.asifrezan.notificationreader.data.models.Users
 import com.asifrezan.notificationreader.databinding.ActivityRegistrationBinding
 import android.content.Intent
+import com.asifrezan.notificationreader.utils.PreferenceUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -67,9 +68,9 @@ class RegistrationActivity : AppCompatActivity() {
                         
                         if (userId != null) {
                             database.child(userId).setValue(user).addOnSuccessListener {
+                                PreferenceUtils.saveString(this, PreferenceUtils.USER_ID_KEY, userId)
                                 progressBar.visibility = View.GONE
-                                startActivity(Intent(this, MainActivity::class.java))
-                                finish()
+                                openMain()
                             }.addOnFailureListener {
                                 progressBar.visibility = View.GONE
                                 binding.errorMsg.text = "Failed to save user data"
@@ -81,5 +82,10 @@ class RegistrationActivity : AppCompatActivity() {
                     }
                 }
         }
+    }
+
+    private fun openMain() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 }

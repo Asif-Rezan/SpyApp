@@ -3,9 +3,9 @@ package com.asifrezan.notificationreader.ui.activities
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.Settings
-import com.asifrezan.notificationreader.data.services.NotificationService
 import com.asifrezan.notificationreader.databinding.ActivityMainBinding
+import com.asifrezan.notificationreader.utils.NotificationAccessHelper
+import com.asifrezan.notificationreader.utils.PreferenceUtils
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     private var pendingOperator: String? = null
     private var shouldResetDisplay = false
     private var expressionValue = ""
+    private var notificationPromptShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,19 +27,16 @@ class MainActivity : AppCompatActivity() {
             finish()
             return
         }
+        PreferenceUtils.saveString(this, PreferenceUtils.USER_ID_KEY, auth.currentUser?.uid.orEmpty())
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupCalculator()
 
 
-        if (!isNotificationServiceEnabled()) {
-            // Ask the user to enable the Notification Listener service
-            val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-            startActivity(intent)
-        } else {
-            // Start the service
-            startService(Intent(this, NotificationService::class.java))
+        if (!notificationPromptShown && !NotificationAccessHelper.isEnabled(this)) {
+            notificationPromptShown = true
+            NotificationAccessHelper.showPrompt(this)
         }
     }
 
@@ -73,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         binding.buttonEquals.setOnClickListener { calculateResult() }
         binding.logoutButton.setOnClickListener {
             auth.signOut()
+            PreferenceUtils.remove(this, PreferenceUtils.USER_ID_KEY)
             startActivity(Intent(this, SignInActivity::class.java))
             finish()
         }
@@ -181,13 +180,5 @@ class MainActivity : AppCompatActivity() {
             else -> operator
         }
     }
-
-
-    private fun isNotificationServiceEnabled(): Boolean {
-        val pkgName = packageName
-        val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
-        return flat != null && flat.contains(pkgName)
-    }
-
 
 }

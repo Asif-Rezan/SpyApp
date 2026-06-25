@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import com.asifrezan.notificationreader.databinding.ActivitySignInBinding
 import android.content.Intent
+import com.asifrezan.notificationreader.utils.PreferenceUtils
 import com.google.firebase.auth.FirebaseAuth
 
 class SignInActivity : AppCompatActivity() {
@@ -20,8 +21,8 @@ class SignInActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         if (auth.currentUser != null) {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            PreferenceUtils.saveString(this, PreferenceUtils.USER_ID_KEY, auth.currentUser?.uid.orEmpty())
+            openMain()
             return
         }
 
@@ -62,12 +63,17 @@ class SignInActivity : AppCompatActivity() {
                 .addOnCompleteListener(this) { task ->
                     progressBar.visibility = View.GONE
                     if (task.isSuccessful) {
-                        startActivity(Intent(this, MainActivity::class.java))
-                        finish()
+                        PreferenceUtils.saveString(this, PreferenceUtils.USER_ID_KEY, task.result.user?.uid.orEmpty())
+                        openMain()
                     } else {
                         binding.errorMsg.text = "Login failed: ${task.exception?.message}"
                     }
                 }
         }
+    }
+
+    private fun openMain() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 }

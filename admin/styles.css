@@ -181,6 +181,32 @@ button.ghost {
   align-items: start;
 }
 
+.tutorial-section {
+  display: grid;
+  gap: 18px;
+  padding-top: 44px;
+  padding-bottom: 12px;
+}
+
+.tutorial-section h2 {
+  margin-bottom: 0;
+}
+
+.video-frame {
+  background: #0f172a;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  width: 100%;
+}
+
+.video-frame iframe {
+  aspect-ratio: 16 / 9;
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
 .panel,
 .content,
 .sidebar,
@@ -474,8 +500,9 @@ p {
 .message {
   border: 1px solid var(--line);
   border-left: 4px solid var(--accent);
+  border-radius: 8px;
   padding: 16px;
-  background: #fbfcfb;
+  background: white;
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
@@ -485,12 +512,17 @@ p {
 }
 
 .message.locked {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  border-left-color: var(--warn);
   position: relative;
   overflow: hidden;
 }
 
 .message.locked .message-body {
-  filter: blur(4px);
+  filter: blur(5px);
+  max-height: 82px;
+  overflow: hidden;
   user-select: none;
 }
 
@@ -502,15 +534,64 @@ p {
 
 .message-meta,
 .admin-meta {
-  display: flex;
-  justify-content: space-between;
+  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   color: var(--muted);
   font-size: 13px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.message-meta strong,
+.admin-meta strong {
+  color: var(--ink);
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.message-platform {
+  background: #e5f2ef;
+  color: var(--accent-dark);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 8px;
+  padding: 3px 7px;
+  vertical-align: middle;
+}
+
+.message-meta span,
+.admin-meta span {
+  white-space: nowrap;
 }
 
 .message-body {
+  color: #263631;
+  font-size: 15px;
+  line-height: 1.65;
+  margin-bottom: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.preview-warning {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-left: 4px solid var(--warn);
+  border-radius: 8px;
+  color: var(--warn);
+  padding: 16px;
+}
+
+.preview-warning strong {
+  color: #92400e;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.preview-warning p {
   line-height: 1.55;
   margin-bottom: 0;
 }
@@ -632,6 +713,21 @@ p {
   .plan-card {
     align-items: stretch;
     grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .status-row,
+  .message-meta,
+  .admin-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .status-row {
+    display: grid;
+  }
+
+  .message-meta span,
+  .admin-meta span {
+    white-space: normal;
   }
 
   .plan-card b {

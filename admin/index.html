@@ -37,6 +37,14 @@
         </div>
       </section>
 
+      <section id="tutorialVideoSection" class="shell tutorial-section hidden">
+        <div>
+          <p class="eyebrow">Tutorial</p>
+          <h2>Watch the setup guide</h2>
+        </div>
+        <div id="tutorialVideoFrame" class="video-frame"></div>
+      </section>
+
       <section id="manualSection" class="shell landing-grid">
         <div class="manual-card">
           <p class="eyebrow">ব্যবহার নির্দেশিকা</p>
@@ -93,7 +101,8 @@
 
       <section id="messagesTab" class="workspace">
         <aside class="sidebar">
-          <button data-platform="Messenger" class="platform active">Messenger</button>
+          <button data-platform="All" class="platform active">All</button>
+          <button data-platform="Messenger" class="platform">Messenger</button>
           <button data-platform="WhatsApp" class="platform">WhatsApp</button>
           <button data-platform="Facebook" class="platform">Facebook</button>
           <button data-platform="Imo" class="platform">Imo</button>
@@ -199,7 +208,8 @@
             Select user
             <select id="adminUserSelect"></select>
           </label>
-          <button data-admin-platform="Messenger" class="admin-platform active">Messenger</button>
+          <button data-admin-platform="All" class="admin-platform active">All</button>
+          <button data-admin-platform="Messenger" class="admin-platform">Messenger</button>
           <button data-admin-platform="WhatsApp" class="admin-platform">WhatsApp</button>
           <button data-admin-platform="Facebook" class="admin-platform">Facebook</button>
           <button data-admin-platform="Imo" class="admin-platform">Imo</button>
@@ -228,7 +238,11 @@
               Google Drive app download link
               <input id="downloadLinkInput" type="url" placeholder="https://drive.google.com/..." />
             </label>
-            <button type="submit">Save download link</button>
+            <label>
+              Tutorial video URL
+              <input id="tutorialVideoInput" type="url" placeholder="https://www.youtube.com/watch?v=..." />
+            </label>
+            <button type="submit">Save settings</button>
           </form>
           <p id="settingsMessage" class="success"></p>
         </div>
