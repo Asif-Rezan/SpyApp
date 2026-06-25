@@ -24,6 +24,7 @@ const firebaseConfig = {
   appId: "1:48154620821:web:admin-dashboard"
 };
 
+
 const SUPER_ADMIN_EMAIL = "asifrezan.office@gmail.com";
 const SUPER_ADMIN_PASSWORD = "admin0011";
 const FREE_MESSAGE_LIMIT = 10;
