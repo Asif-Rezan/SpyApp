@@ -1,7 +1,8 @@
 package com.asifrezan.notificationreader.data.models
 data class Messages(
-    val username: String,
-    val timestamp: String,
-    val msgFrom: String,
-    val message: String
+    val userId: String = "",
+    val contactName: String = "",
+    val timestamp: String = "",
+    val platform: String = "",
+    val message: String = ""
 )

@@ -1,45 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#0D1116"
+    android:orientation="vertical"
+    android:paddingStart="18dp"
+    android:paddingTop="24dp"
+    android:paddingEnd="18dp"
+    android:paddingBottom="18dp"
     tools:context=".ui.activities.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/container"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/bottomNavigationBarId"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="bottom"
+        android:orientation="vertical">
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragmentContainerView"
-            android:name="androidx.navigation.fragment.NavHostFragment"
+        <Button
+            android:id="@+id/logoutButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="end"
+            android:backgroundTint="#1D2630"
+            android:minWidth="96dp"
+            android:text="Logout"
+            android:textAllCaps="false"
+            android:textColor="#C8D2DC" />
+
+        <TextView
+            android:id="@+id/expressionText"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:defaultNavHost="true"
-            app:navGraph="@navigation/bottom_nav_menu" />
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:maxLines="1"
+            android:minHeight="32dp"
+            android:text=""
+            android:textColor="#7D8893"
+            android:textSize="20sp" />
 
-    </FrameLayout>
+        <TextView
+            android:id="@+id/displayText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:maxLines="1"
+            android:paddingBottom="22dp"
+            android:text="0"
+            android:textColor="@android:color/white"
+            android:textSize="64sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationBarId"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_nav_menu"
+        android:layout_height="76dp"
+        android:orientation="horizontal">
 
-        />
+        <Button
+            android:id="@+id/buttonClear"
+            style="@style/CalcButton.Gray"
+            android:text="AC" />
 
+        <Button
+            android:id="@+id/buttonSign"
+            style="@style/CalcButton.Gray"
+            android:text="+/-" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/buttonPercent"
+            style="@style/CalcButton.Gray"
+            android:text="%" />
+
+        <Button
+            android:id="@+id/buttonDivide"
+            style="@style/CalcButton.Orange"
+            android:text="/" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="76dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button7"
+            style="@style/CalcButton.Dark"
+            android:text="7" />
+
+        <Button
+            android:id="@+id/button8"
+            style="@style/CalcButton.Dark"
+            android:text="8" />
+
+        <Button
+            android:id="@+id/button9"
+            style="@style/CalcButton.Dark"
+            android:text="9" />
+
+        <Button
+            android:id="@+id/buttonMultiply"
+            style="@style/CalcButton.Orange"
+            android:text="x" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="76dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button4"
+            style="@style/CalcButton.Dark"
+            android:text="4" />
+
+        <Button
+            android:id="@+id/button5"
+            style="@style/CalcButton.Dark"
+            android:text="5" />
+
+        <Button
+            android:id="@+id/button6"
+            style="@style/CalcButton.Dark"
+            android:text="6" />
+
+        <Button
+            android:id="@+id/buttonMinus"
+            style="@style/CalcButton.Orange"
+            android:text="-" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="76dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button1"
+            style="@style/CalcButton.Dark"
+            android:text="1" />
+
+        <Button
+            android:id="@+id/button2"
+            style="@style/CalcButton.Dark"
+            android:text="2" />
+
+        <Button
+            android:id="@+id/button3"
+            style="@style/CalcButton.Dark"
+            android:text="3" />
+
+        <Button
+            android:id="@+id/buttonPlus"
+            style="@style/CalcButton.Orange"
+            android:text="+" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="76dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button0"
+            style="@style/CalcButton.Dark"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:text="0" />
+
+        <Button
+            android:id="@+id/buttonDecimal"
+            style="@style/CalcButton.Dark"
+            android:text="." />
+
+        <Button
+            android:id="@+id/buttonEquals"
+            style="@style/CalcButton.Orange"
+            android:text="=" />
+    </LinearLayout>
+
+</LinearLayout>

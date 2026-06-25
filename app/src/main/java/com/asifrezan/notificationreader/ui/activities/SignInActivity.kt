@@ -4,71 +4,70 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import com.asifrezan.notificationreader.databinding.ActivitySignInBinding
-import com.asifrezan.notificationreader.utils.PreferenceUtils
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import android.content.Intent
+import com.google.firebase.auth.FirebaseAuth
 
 class SignInActivity : AppCompatActivity() {
     lateinit var binding: ActivitySignInBinding
-    private lateinit var database: DatabaseReference
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySignInBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
 
+        auth = FirebaseAuth.getInstance()
+
+        if (auth.currentUser != null) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+
+        binding.registerTextView.setOnClickListener {
+            startActivity(Intent(this, RegistrationActivity::class.java))
+        }
+
+        binding.forgotPasswordTextView.setOnClickListener {
+            val email = binding.usernameEditText.text.toString().trim()
+            if (email.isEmpty()) {
+                binding.errorMsg.text = "Enter your email first"
+                return@setOnClickListener
+            }
+            auth.sendPasswordResetEmail(email)
+                .addOnSuccessListener {
+                    binding.errorMsg.text = "Password reset email sent"
+                }
+                .addOnFailureListener {
+                    binding.errorMsg.text = "Reset failed: ${it.message}"
+                }
+        }
+
         binding.loginButton.setOnClickListener {
             val progressBar = binding.progressBar
             progressBar.visibility = View.VISIBLE
             binding.errorMsg.text = ""
 
-            if (!::database.isInitialized) {
-                database = FirebaseDatabase.getInstance().getReference("Users")
+            val email = binding.usernameEditText.text.toString().trim() // Assuming username field is used for email
+            val password = binding.passwordEditText.text.toString().trim()
+
+            if (email.isEmpty() || password.isEmpty()) {
+                binding.errorMsg.text = "Please enter email and password"
+                progressBar.visibility = View.GONE
+                return@setOnClickListener
             }
 
-            val username = binding.usernameEditText.text.toString()
-            val password = binding.passwordEditText.text.toString()
-
-            CoroutineScope(Dispatchers.IO).launch {
-                database.child(username)
-                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            progressBar.visibility = View.GONE
-                            if (snapshot.exists()) {
-                                val storedPassword =
-                                    snapshot.child("password").getValue(String::class.java)
-                                if (password == storedPassword) {
-                                    // Successful login
-                                    binding.errorMsg.text = "Successfully logged in"
-                                    PreferenceUtils.saveString(
-                                        this@SignInActivity,
-                                        "username",
-                                        username
-                                    )
-                                } else {
-                                    // Incorrect password
-                                    binding.errorMsg.text = "Incorrect password"
-                                }
-                            } else {
-                                // No user found
-                                binding.errorMsg.text = "No user found"
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            progressBar.visibility = View.GONE
-                            // Handle cancellation or errors, if needed
-                        }
-                    })
-            }
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this) { task ->
+                    progressBar.visibility = View.GONE
+                    if (task.isSuccessful) {
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    } else {
+                        binding.errorMsg.text = "Login failed: ${task.exception?.message}"
+                    }
+                }
         }
-
-
     }
 }
